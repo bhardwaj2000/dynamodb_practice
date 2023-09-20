@@ -1,0 +1,48 @@
+public static void main(String[] args) {
+        // Create the DynamoDB Client with the region you want
+        AmazonDynamoDB dynamoDB = createDynamoDbClient("us-west-2");
+        
+        try {
+            // Create ScanRequest
+            ScanRequest scanRequest = createScanRequest();
+            ScanResult scanResult = dynamoDB.scan(scanRequest);
+            System.out.println("Scan successful.");
+            // Handle scanResult
+
+        } catch (Exception e) {
+            handleScanErrors(e);
+        }
+    }
+
+    private static AmazonDynamoDB createDynamoDbClient(String region) {
+        // Use the following builder instead when using DynamoDB local
+        // return AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
+        // new AwsClientBuilder.EndpointConfiguration("http://localhost:8000", "localhost")).withCredentials(
+        // new AWSStaticCredentialsProvider(new BasicAWSCredentials("access_key_id", "secret_access_key"))
+        // )
+        // .build();
+        return AmazonDynamoDBClientBuilder.standard().withRegion(region).build();
+    }
+
+    private static ScanRequest createScanRequest() {
+        ScanRequest scanRequest = new ScanRequest();
+        scanRequest.setTableName("book");
+        String filterExpression = "#9aa40 = :9aa40";
+        scanRequest.setFilterExpression(filterExpression);
+        scanRequest.setConsistentRead(false);
+        scanRequest.setExpressionAttributeNames(getExpressionAttributeNames());
+        scanRequest.setExpressionAttributeValues(getExpressionAttributeValues());
+        return scanRequest;
+    }
+
+    private static Map<String, String> getExpressionAttributeNames() {
+        Map<String, String> expressionAttributeNames = new HashMap<String, String>(); 
+        expressionAttributeNames.put("#9aa40", "isbn");
+        return expressionAttributeNames;
+    }
+
+    private static Map<String, AttributeValue> getExpressionAttributeValues() {
+        Map<String, AttributeValue> expressionAttributeValues = new HashMap<String, AttributeValue>(); 
+        expressionAttributeValues.put(":9aa40", new AttributeValue("2892828282822"));
+        return expressionAttributeValues;
+    }
